@@ -1,0 +1,13 @@
+﻿
+preciousshot.version.notify=[PreciousShot] 新しいバージョン "%s" がご利用できます。
+preciousshot.chat.shooting.mode=撮影モード
+preciousshot.chat.shooting.done=スクリーンショットを保存しました: %s。
+preciousshot.chat.shooting.failed=スクリーンショットの保存に失敗しました。
+preciousshot.chat.shooting.url=開く
+preciousshot.chat.panorama.mode=パノラマモード: shot %s
+preciousshot.chat.panorama.done=パノラマ画像を保存しました。
+preciousshot.chat.panorama.failed=パノラマ画像の作成に失敗しました。
+preciousshot.chat.twitter.disabled=Twitter機能が有効になっていません。
+preciousshot.chat.twitter.failed=Twitterに接続できませんでした。
+preciousshot.chat.twitter.sccess=ツイートしました: %s。
+preciousshot.chat.twitter.url=開く

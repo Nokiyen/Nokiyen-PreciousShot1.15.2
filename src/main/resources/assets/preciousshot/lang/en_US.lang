@@ -1,0 +1,13 @@
+﻿
+preciousshot.version.notify=[PreciousShot] New version "%s" is available now!
+preciousshot.chat.shooting.mode=Shooting Mode
+preciousshot.chat.shooting.done=Saved the screenshot: %s.
+preciousshot.chat.shooting.failed=Failed to save the screenshot.
+preciousshot.chat.shooting.url=open
+preciousshot.chat.panorama.mode=Panorama Mode: shot %s
+preciousshot.chat.panorama.done=Successfully saved the panorama shot: %s.
+preciousshot.chat.panorama.failed=Failed to save the panorama shot.
+preciousshot.chat.twitter.disabled=Can't use Twitter functions.
+preciousshot.chat.twitter.failed=Failed to connect Twitter.
+preciousshot.chat.twitter.sccess=successfully tweeted: %s.
+preciousshot.chat.twitter.url=open

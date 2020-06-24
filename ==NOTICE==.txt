@@ -1,0 +1,18 @@
+/**********
+ * NOTICE
+ * 
+ *
+ * This work uses the Java library, "Twitter4J (http://twitter4j.org)", licensed under Apache License 2.0.
+ * 
+ * For Apache License 2.0, see here.
+ * 		http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Especially the class, noki.preciousshot.helper.TwitterHelper, directly uses classes supplied by the library.
+ * 
+ **********/
+
+/**********
+ *
+ * For the lisence of this mod, please see the forum you downloaded this mod from.
+ * 
+ **********/

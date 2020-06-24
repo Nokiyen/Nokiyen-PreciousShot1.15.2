@@ -1,0 +1,10 @@
+#Directories.
+/build/
+/out/
+/run/
+/src/test/
+#Files.
+/preciousshot.json
+/preciousshot2.json
+/buildlog.txt
+/release.bat
