@@ -1,4 +1,4 @@
-package noki.preciousshot.mode;
+package assets.preciousshot.temp;
 
 import java.io.IOException;
 

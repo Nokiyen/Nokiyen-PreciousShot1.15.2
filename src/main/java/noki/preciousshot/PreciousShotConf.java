@@ -9,6 +9,7 @@ import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.math.MathHelper;
+import org.lwjgl.glfw.GLFW;
 
 
 /**********
@@ -42,7 +43,7 @@ public class PreciousShotConf {
 		PSOption.loadConfig(builder);
 
 		builder.push("Keys");
-		keyNum = builder.comment("").defineInRange("keyNum", 38, 1, 300);
+		keyNum = builder.comment("").defineInRange("keyNum", GLFW.GLFW_KEY_J, 1, 300);
 		builder.pop();
 
 		builder.push("Frame Set");

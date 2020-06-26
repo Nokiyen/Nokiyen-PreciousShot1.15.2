@@ -14,8 +14,12 @@
 
 package noki.preciousshot;
 
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLLoadCompleteEvent;
+import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import noki.preciousshot.mode.ModeManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import net.minecraftforge.common.MinecraftForge;
@@ -49,6 +53,7 @@ public class PreciousShotCore {
 	public PreciousShotCore() {
 
 		FMLJavaModLoadingContext.get().getModEventBus().addListener(this::postInit);
+		FMLJavaModLoadingContext.get().getModEventBus().addListener(this::onClientSetup);
 		PreciousShotConf.loadConfig();
 
 //		ModeManager.init();
@@ -64,6 +69,12 @@ public class PreciousShotCore {
 	private void postInit(final FMLLoadCompleteEvent event) {
 
 		ResourceManager.init();
+
+	}
+
+	public void onClientSetup(FMLClientSetupEvent event) {
+
+		ModeManager.init();
 
 	}
 

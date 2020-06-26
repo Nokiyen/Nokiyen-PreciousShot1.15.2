@@ -2,22 +2,24 @@ package noki.preciousshot.mode;
 
 import java.util.ArrayList;
 
-import org.lwjgl.input.Mouse;
+import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.TextComponent;
+import net.minecraftforge.client.event.InputEvent;
+import net.minecraftforge.client.event.ScreenshotEvent;
+import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraftforge.client.event.MouseEvent;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent;
-import net.minecraftforge.fml.common.gameevent.TickEvent.RenderTickEvent;
 import noki.preciousshot.PreciousShotConf.PSOption;
-import noki.preciousshot.asm.F2PressedEvent;
+import noki.preciousshot.PreciousShotCore;
 import noki.preciousshot.helper.LangHelper.LangKey;
 import noki.preciousshot.helper.LangHelper;
 import noki.preciousshot.helper.RenderHelper;
 import noki.preciousshot.helper.ScreenShotHelper;
 import noki.preciousshot.helper.RenderHelper.FadeStringRender;
+import org.lwjgl.glfw.GLFW;
+
 import static noki.preciousshot.PreciousShotConf.PSOption.*;
 
 
@@ -36,7 +38,7 @@ public class ModeEventShooting {
 	protected boolean confirmScreenShot = false;
 	protected boolean hideGuiKeep = false;
 	protected int counter = 0;
-	protected ArrayList<FadeStringRender> fadeStrings = new ArrayList<FadeStringRender>();
+	protected ArrayList<FadeStringRender> fadeStrings = new ArrayList<>();
 	protected FadeStringRender fovRender;
 	
 	protected boolean enable = false;
@@ -50,9 +52,9 @@ public class ModeEventShooting {
 	//START: スクショが予約されていた場合、スクショを確約し、描画を消す。
 	//END: 各種描画を行う。スクショが確約されていた場合撮影。
 	@SubscribeEvent
-	public void onRenderTick(RenderTickEvent event) {
+	public void onRenderTick(TickEvent.RenderTickEvent event) {
 		
-		if(this.enable == false) {
+		if(!this.enable) {
 			return;
 		}
 		
@@ -61,12 +63,12 @@ public class ModeEventShooting {
 				if(this.bookScreenShot) {
 					this.confirmScreenShot = true;
 					if(HIDE.isEnable()) {
-						Minecraft.getMinecraft().gameSettings.hideGUI = true;
+						Minecraft.getInstance().gameSettings.hideGUI = true;
 					}
 				}
 				break;
 			case END:
-				if(Minecraft.getMinecraft().currentScreen == null && !this.confirmScreenShot) {
+				if(Minecraft.getInstance().currentScreen == null && !this.confirmScreenShot) {
 					this.render();
 				}
 				
@@ -74,7 +76,7 @@ public class ModeEventShooting {
 					this.saveScreenshot(TOP.value(), RIGHT.value(), BOTTOM.value(), LEFT.value());
 					this.bookScreenShot = false;
 					this.confirmScreenShot = false;
-					Minecraft.getMinecraft().gameSettings.hideGUI = hideGuiKeep;
+					Minecraft.getInstance().gameSettings.hideGUI = hideGuiKeep;
 				}
 				break;
 		}
@@ -83,17 +85,17 @@ public class ModeEventShooting {
 	
 	protected void render() {
 		
-		Minecraft mc = Minecraft.getMinecraft();
-		
-		mc.entityRenderer.setupOverlayRendering();
-		ScaledResolution resolution = new ScaledResolution(mc);
+		Minecraft mc = Minecraft.getInstance();
+
+//		mc.entityRenderer.setupOverlayRendering();
+//		ScaledResolution resolution = new ScaledResolution(mc);
+		int scaledWidth = mc.getMainWindow().getScaledWidth();
+		int scaledHeight = mc.getMainWindow().getScaledHeight();
 		if(MARGIN.isEnable()) {
-			RenderHelper.renderMargin(TOP.value(), RIGHT.value(), BOTTOM.value(), LEFT.value(),
-						resolution.getScaledWidth(), resolution.getScaledHeight());
+			RenderHelper.renderMargin(TOP.value(), RIGHT.value(), BOTTOM.value(), LEFT.value(), scaledWidth, scaledHeight);
 		}
 		if(GRID.value() != 0) {
-			RenderHelper.renderGrid(TOP.value(), RIGHT.value(), BOTTOM.value(), LEFT.value(), 
-					resolution.getScaledWidth(), resolution.getScaledHeight(), GRID.value());
+			RenderHelper.renderGrid(TOP.value(), RIGHT.value(), BOTTOM.value(), LEFT.value(), scaledWidth, scaledHeight, GRID.value());
 		}
 		
 		for(FadeStringRender each: this.fadeStrings) {
@@ -108,9 +110,9 @@ public class ModeEventShooting {
 	//START: 右クリック状態を初期化。
 	//END: 連写のタイミングに達したら撮影。
 	@SubscribeEvent
-	public void onClientTick(ClientTickEvent event) {
+	public void onClientTick(TickEvent.ClientTickEvent event) {
 		
-		if(enable == false) {
+		if(!this.enable) {
 			return;
 		}
 		
@@ -133,22 +135,27 @@ public class ModeEventShooting {
 		
 	}
 	
-	//F2キーを押されたら撮影。
+	//通常のF2キーでのスクリーンショットを置換。
 	@SubscribeEvent
-	public void onKeyTyped(F2PressedEvent event) {
-		
-		if(enable == false) {
+	public void onScreenShot(ScreenshotEvent event) {
+
+		PreciousShotCore.log("on screen shot.");
+		if(!this.enable || !SHOT.isEnable()) {
+			PreciousShotCore.log("disabled / {} / {}.", this.enable, SHOT.isEnable());
 			return;
 		}
-		
+
+		event.setCanceled(true);
+		event.setResultMessage(new StringTextComponent(""));
 		this.dealScreenshot();
 		
 	}
-	
+
+	//マウス右クリックにスクリーンショット
 	@SubscribeEvent
-	public void onMouseInput(MouseEvent event) {
+	public void onMouseInput(InputEvent.MouseInputEvent event) {
 		
-		if(this.enable == false) {
+		if(!this.enable) {
 			return;
 		}
 		
@@ -157,14 +164,18 @@ public class ModeEventShooting {
 		}
 		
 		//右クリックで撮影。
-		if(event.getButton() == 1 && event.isButtonstate() == true) {
+		if(event.getButton() == GLFW.GLFW_MOUSE_BUTTON_RIGHT && event.getAction() == GLFW.GLFW_PRESS) {
 			event.setCanceled(true);
 			this.isRightClicked = true;
 			this.dealScreenshot();
 		}
 		
-		//ホイールでズーム(fov)
-		int wheel = Mouse.getEventDWheel();
+	}
+
+	//ホイールでズーム(fov)
+	@SubscribeEvent
+	public void onMouseScroll(InputEvent.MouseScrollEvent event) {
+		double wheel = event.getScrollDelta();
 		if(wheel != 0) {
 			if(wheel > 0) {
 				FOV.add();
@@ -174,52 +185,47 @@ public class ModeEventShooting {
 			}
 			RenderHelper.applySettingEffect();
 			event.setCanceled(true);
-			
-			if(fovRender == null) {
-				Minecraft mc = Minecraft.getMinecraft();
-				ScaledResolution resolution = new ScaledResolution(mc);
+
+			if(this.fovRender == null) {
+				Minecraft mc = Minecraft.getInstance();
 				this.fovRender = new FadeStringRender("FOV: "+String.valueOf(FOV.value()), 0xffffff,
-						resolution.getScaledWidth()-50, 5, Minecraft.getMinecraft().fontRenderer, 0, 0, 100, 20);
+						mc.getMainWindow().getScaledWidth()-50, 5, Minecraft.getInstance().fontRenderer, 0, 0, 100, 20);
 				this.fadeStrings.add(this.fovRender);
 			}
 			this.fovRender.text = "FOV: "+String.valueOf(FOV.value());
 			this.fovRender.resetPhase();
 		}
-		
 	}
 	
 	protected void dealScreenshot() {
-		
-		if(SHOT.isEnable() == true) {
-			if(Minecraft.getMinecraft().gameSettings.hideGUI == true && GRID.value() == 0) {
-				this.saveScreenshot(TOP.value(), RIGHT.value(), BOTTOM.value(), LEFT.value());
-			}
-			else {
-				this.bookScreenShotOnNextTick();
-			}
+
+		PreciousShotCore.log("on deal screen shot.");
+		if(Minecraft.getInstance().gameSettings.hideGUI && GRID.value() == 0) {
+			this.saveScreenshot(TOP.value(), RIGHT.value(), BOTTOM.value(), LEFT.value());
 		}
 		else {
-			Minecraft mc = Minecraft.getMinecraft();
-			ITextComponent res = net.minecraft.util.ScreenShotHelper.saveScreenshot(
-					mc.mcDataDir, mc.displayWidth, mc.displayHeight, mc.getFramebuffer());
-			mc.ingameGUI.getChatGUI().printChatMessage(res);
+			this.bookScreenShotOnNextTick();
 		}
-		
+
 	}
 	
 	public void bookScreenShotOnNextTick() {
-		
-		if(this.enable == false) {
+
+		PreciousShotCore.log("on book screen shot.");
+
+		if(!this.enable) {
 			return;
 		}
 		
 		this.bookScreenShot = true;
-		this.hideGuiKeep = Minecraft.getMinecraft().gameSettings.hideGUI;
+		this.hideGuiKeep = Minecraft.getInstance().gameSettings.hideGUI;
 		
 	}
 	
 	public String saveScreenshot(int top, int right, int bottom, int left) {
-		
+
+		PreciousShotCore.log("on save screen shot.");
+
 		String fileName =  ScreenShotHelper.saveScreenshot(top, right, bottom, left);
 		if(PSOption.CHAT.isEnable()) {
 			if(fileName != null) {
@@ -247,7 +253,7 @@ public class ModeEventShooting {
 		this.fadeStrings.clear();
 		
 		this.fadeStrings.add(new FadeStringRender(LangKey.SHOOTING_MODE.translated(), 0xffffff, 5, 5,
-				Minecraft.getMinecraft().fontRenderer, 0, 0, 100, 20));
+				Minecraft.getInstance().fontRenderer, 0, 0, 100, 20));
 		if(this.fovRender != null) {
 			this.fadeStrings.add(this.fovRender);
 		}

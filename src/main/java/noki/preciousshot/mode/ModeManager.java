@@ -1,19 +1,14 @@
 package noki.preciousshot.mode;
 
+import net.minecraft.client.settings.KeyBinding;
 import net.minecraftforge.client.event.InputEvent;
 import net.minecraftforge.client.event.ScreenshotEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.settings.KeyBinding;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
-import noki.preciousshot.PreciousShotCore;
 import noki.preciousshot.PreciousShotConf;
-import noki.preciousshot.helper.LangHelper;
-import noki.preciousshot.helper.ScreenShotHelper;
-import noki.preciousshot.resource.ResourceManager;
-import static noki.preciousshot.PreciousShotConf.PSOption.*;
+import noki.preciousshot.PreciousShotCore;
+import org.lwjgl.glfw.GLFW;
 
 
 /**********
@@ -31,7 +26,7 @@ public class ModeManager {
 	public static ModeEventShooting modeShooting;
 	public static ModeEventShooting modePanorama;
 	
-//	public static KeyBinding keyF2 = new KeyBinding("preciousshot.key.f2", 291, "System");
+	public static KeyBinding keyF2 = new KeyBinding("preciousshot.key.f2", GLFW.GLFW_KEY_F2, "System");
 	public static KeyBinding key = new KeyBinding("preciousshot.key.on", PreciousShotConf.keyNum.get(), "System");
 	
 	
@@ -40,34 +35,39 @@ public class ModeManager {
 	// define member methods.
 	//******************************//
 	//F2キーを押されたとき、撮影モード・パノラマモードでなければ通常のスクリーンショットを行う。
-	@SubscribeEvent
+/*	@SubscribeEvent
 	public void onScreenshot(ScreenshotEvent event) {
 		
 		PreciousShotCore.log("on screen shot.");
 		
 		if(!modeShooting.isOpen() && !modePanorama.isOpen()) {
 			// default screen shot.
-/*			Minecraft mc = Minecraft.getMinecraft();
+			Minecraft mc = Minecraft.getMinecraft();
 			ITextComponent res = net.minecraft.util.ScreenShotHelper.saveScreenshot(
 					mc.mcDataDir, mc.displayWidth, mc.displayHeight, mc.getFramebuffer());
-			mc.ingameGUI.getChatGUI().printChatMessage(res);*/
+			mc.ingameGUI.getChatGUI().printChatMessage(res);
 			//nothing to do.
 		}
 		else {
 			event.setCanceled(true);
-			ScreenShotHelper.saveScreenshot(100,0,100,0);
 		}
 		
-	}
+	}*/
 	
 	//Lキーを押されたとき、通常画面からなら撮影・パノラマモードへ、撮影・パノラマモードなら設定モードへ移行する。
 	//1.12から、LキーがAdvancementsになったのでJキーへ。
 	@SubscribeEvent
 	public void onKeyInput(InputEvent.KeyInputEvent event) {
 		
-		PreciousShotCore.log("on key input.");
+		PreciousShotCore.log("on key input/ {} / {} / J={}.", event.getKey(), PreciousShotConf.keyNum.get(), GLFW.GLFW_KEY_J);
 		
 //		if(key.isPressed() == false) {
+/*		if(!key.isKeyDown()) {
+			PreciousShotCore.log("key is not pressed:"+event.hashCode());
+			PreciousShotCore.log("false");
+			return;
+		}*/
+//		if(event.getKey() != GLFW.GLFW_KEY_J) {
 		if(!key.isKeyDown()) {
 			PreciousShotCore.log("key is not pressed:"+event.hashCode());
 			PreciousShotCore.log("false");
@@ -82,7 +82,7 @@ public class ModeManager {
 		if(currentMode.isOpen()) {
 			PreciousShotCore.log("close mode.");
 			currentMode.closeMode();
-			Minecraft.getInstance().displayGuiScreen(new ModeGuiSetting());
+//			Minecraft.getInstance().displayGuiScreen(new ModeGuiSetting());
 		}
 		else {
 			PreciousShotCore.log("open mode.");
@@ -118,8 +118,8 @@ public class ModeManager {
 	//----------
 	public static void init() {
 		
-//		ClientRegistry.registerKeyBinding(ModeManager.keyF2);
-//		ClientRegistry.registerKeyBinding(ModeManager.key);
+		ClientRegistry.registerKeyBinding(ModeManager.keyF2);
+		ClientRegistry.registerKeyBinding(ModeManager.key);
 		
 		instance = new ModeManager();
 		modeShooting = new ModeEventShooting();
