@@ -175,14 +175,17 @@ public class ModeEventShooting {
 	//ホイールでズーム(fov)
 	@SubscribeEvent
 	public void onMouseScroll(InputEvent.MouseScrollEvent event) {
+		PreciousShotCore.log("on mouse scroll.");
 		double wheel = event.getScrollDelta();
 		if(wheel != 0) {
+			PreciousShotCore.log("wheel not zero / {}.", wheel);
 			if(wheel > 0) {
 				FOV.add();
 			}
 			else if(wheel < 0) {
 				FOV.dif();
 			}
+			PreciousShotCore.log("fov / {}.", FOV.getDouble());
 			RenderHelper.applySettingEffect();
 			event.setCanceled(true);
 

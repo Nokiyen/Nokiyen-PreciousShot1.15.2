@@ -1,5 +1,6 @@
 package noki.preciousshot.mode;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraftforge.client.event.InputEvent;
 import net.minecraftforge.client.event.ScreenshotEvent;
@@ -82,7 +83,7 @@ public class ModeManager {
 		if(currentMode.isOpen()) {
 			PreciousShotCore.log("close mode.");
 			currentMode.closeMode();
-//			Minecraft.getInstance().displayGuiScreen(new ModeGuiSetting());
+			Minecraft.getInstance().displayGuiScreen(new ModeGuiSetting());
 		}
 		else {
 			PreciousShotCore.log("open mode.");
