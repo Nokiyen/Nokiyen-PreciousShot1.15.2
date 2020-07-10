@@ -64,6 +64,11 @@ public class PreciousShotConf {
 
 		ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, configSpec);
 
+		frameSet1.setConfigValue();
+		frameSet2.setConfigValue();
+		frameSet3.setConfigValue();
+		frameSet4.setConfigValue();
+
 	}
 
 
@@ -101,7 +106,7 @@ public class PreciousShotConf {
 				return (float)this.value() / 100.0F;
 			}
 		},
-		FOV("fov", false, false, 70, 10, 170, "fov, applied when taking shot."),
+		FOV("fov", false, false, 70, 10, 150, "fov, applied when taking shot."),
 		CONT("cont", false, false, 5, 1, 20, "times of continuous shots."),
 		PANORAMA("panorama", false, false, 6, 1, 20, "times of panorama shots."),
 		GRID("grid", true, true, 0, 0, 5, "grid for shot support."),
@@ -160,12 +165,18 @@ public class PreciousShotConf {
 
 		public void add(int step) {
 			int newValue = this.value.get() + step;
+
 			if(newValue <= this.maxValue) {
 				this.value.set(newValue);
 				this.value.save();
 			}
-			else if(this.cycle == true) {
-				this.value.set(newValue % (this.maxValue+1));
+			else {
+				if(this.cycle) {
+					this.value.set(newValue % (this.maxValue+1));
+				}
+				else {
+					this.value.set(this.maxValue);
+				}
 				this.value.save();
 			}
 		}
@@ -176,12 +187,18 @@ public class PreciousShotConf {
 
 		public void dif(int step) {
 			int newValue = this.value.get() - step;
+
 			if(newValue >= this.minValue) {
 				this.value.set(newValue);
 				this.value.save();
 			}
-			else if(this.cycle == true) {
-				this.value.set(newValue % (this.maxValue+1));
+			else {
+				if(this.cycle) {
+					this.value.set(newValue % (this.maxValue+1));
+				}
+				else {
+					this.value.set(this.minValue);
+				}
 				this.value.save();
 			}
 		}
@@ -237,8 +254,8 @@ public class PreciousShotConf {
 		public IntValue intValueHeight;
 		public String comment;
 
-		public boolean forceDisplayWidth = false;	//currently not used.
-		public boolean forceDisplayHeight = false;	//currently not used.
+//		public boolean forceDisplayWidth = false;	//currently not used.
+//		public boolean forceDisplayHeight = false;	//currently not used.
 
 
 		//*****define member methods.***//
@@ -250,18 +267,7 @@ public class PreciousShotConf {
 			this.comment = comment;
 
 			this.intValueWidth = this.builder.comment(this.comment).defineInRange("frameWidth"+this.id, this.defaultWidth, 10, Integer.MAX_VALUE);
-//			this.width = this.intValueWidth.get();
 			this.intValueHeight = this.builder.comment(this.comment).defineInRange("frameHeight"+this.id, this.defaultHeight, 10, Integer.MAX_VALUE);
-//			this.height = this.intValueHeight.get();
-
-			if(this.width < 10 || Minecraft.getInstance().getMainWindow().getWidth() < this.width) {
-				this.width = Minecraft.getInstance().getMainWindow().getWidth();
-				forceDisplayWidth = true;
-			}
-			if(this.height < 10 || Minecraft.getInstance().getMainWindow().getHeight() < this.height) {
-				this.height = Minecraft.getInstance().getMainWindow().getHeight();
-				forceDisplayHeight = true;
-			}
 		}
 
 		public int getWidth() {
@@ -270,6 +276,21 @@ public class PreciousShotConf {
 
 		public int getHeight() {
 			return this.intValueHeight.get();
+		}
+
+		public void setConfigValue() {
+			this.width = this.intValueWidth.get();
+			if(this.width < 10 || Minecraft.getInstance().getMainWindow().getWidth() < this.width) {
+				this.width = Minecraft.getInstance().getMainWindow().getWidth();
+//				forceDisplayWidth = true;
+			}
+
+			this.height = this.intValueHeight.get();
+			if(this.height < 10 || Minecraft.getInstance().getMainWindow().getHeight() < this.height) {
+				this.height = Minecraft.getInstance().getMainWindow().getHeight();
+//				forceDisplayHeight = true;
+			}
+
 		}
 	}
 

@@ -9,7 +9,11 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.NativeImage;
 import net.minecraft.client.shader.Framebuffer;
+import noki.preciousshot.PreciousShotConf;
 import noki.preciousshot.PreciousShotCore;
+import noki.preciousshot.asm.ASMChatClickEvent;
+import noki.preciousshot.PreciousShotConf.PSOption;
+import noki.preciousshot.helper.LangHelper.LangKey;
 
 
 /**********
@@ -37,15 +41,21 @@ public class ScreenShotHelper {
 	//----------
 	public static String saveScreenshot(int top, int right, int bottom, int left) {
 
+		//java.lang.IllegalStateException: Rendersystem called from wrong thread
+		NativeImage resizedImage = getScreenShotImage(top, right, bottom, left);
+		ScreenShotThread newThread = new ScreenShotThread(resizedImage);
+		newThread.start();
 
+//		return saveScreenshotRaw(top, right, bottom, left);
+		return "";
 
-		PreciousShotCore.log("enter screenshot.");
+	}
+
+	public static NativeImage getScreenShotImage(int top, int right, int bottom, int left) {
 
 		Minecraft mc = Minecraft.getInstance();
 		Framebuffer buffer = mc.getFramebuffer();
 
-/*		int width = mc.func_228018_at_().getWidth();
-		int height = mc.func_228018_at_().getHeight();*/
 		int width = buffer.framebufferTextureWidth;
 		int height = buffer.framebufferTextureHeight;
 
@@ -66,73 +76,9 @@ public class ScreenShotHelper {
 
 		nativeImage.flip();
 		resizedImage.flip();
+		nativeImage.close();
 
-
-/*		AlteredNativeImage nativeimage = new AlteredNativeImage(outputWidth, outputHeight, false);
-		RenderSystem.bindTexture(buffer.framebufferTexture);
-		nativeimage.downloadFromTexture(0, true, outputWidth, outputHeight, left, top);
-		nativeimage.flip();*/
-
-
-/*		int k = width * height;
-		if(pixelBuffer == null || pixelBuffer.capacity() < k) {
-			pixelBuffer = BufferUtils.createIntBuffer(k);
-			pixelValues = new int[k];
-		}
-
-		GL11.glPixelStorei(GL11.GL_PACK_ALIGNMENT, 1);
-		GL11.glPixelStorei(GL11.GL_UNPACK_ALIGNMENT, 1);
-		pixelBuffer.clear();
-
-		if(OpenGlHelper.isFramebufferEnabled()) {
-			GlStateManager.bindTexture(buffer.framebufferTexture);
-			GL11.glGetTexImage(GL11.GL_TEXTURE_2D, 0, GL12.GL_BGRA, GL12.GL_UNSIGNED_INT_8_8_8_8_REV, pixelBuffer);
-		}
-		else{
-			GL11.glReadPixels(0, 0, width, height, GL12.GL_BGRA, GL12.GL_UNSIGNED_INT_8_8_8_8_REV, pixelBuffer);
-		}
-
-		pixelBuffer.get(pixelValues);
-		TextureUtil.processPixelValues(pixelValues, width, height);
-		BufferedImage bufferedimage = null;
-
-		if(OpenGlHelper.isFramebufferEnabled()) {
-			bufferedimage = new BufferedImage(outputWidth, outputHeight, 1);
-			for(int i = top; i < height - bottom; i++) {
-				for(int j = left; j < width - right; j++) {
-					bufferedimage.setRGB(j-left, i-top, pixelValues[i * width + j]);
-				}
-			}
-		}
-		else {
-			bufferedimage = new BufferedImage(width, height, 1);
-			bufferedimage.setRGB(0, 0, width, height, pixelValues, 0, width);
-		}*/
-
-		File file = null;
-		try {
-			File directory = new File(Minecraft.getInstance().gameDir, "screenshots");
-			directory.mkdir();
-			file = getTimestampedPNGFileForDirectory(directory);
-			PreciousShotCore.log("file name is {}.", file.getPath());
-//			boolean res = ImageIO.write(bufferedimage, "png", file);
-			resizedImage.write(file);
-//			PreciousShotCore.log("res is %s.", String.valueOf(res));
-		}
-		catch(Exception exception) {
-			PreciousShotCore.log("exception: {}", exception.toString());
-		}
-		finally {
-			nativeImage.close();
-			resizedImage.close();
-		}
-
-		/*SSSCore.log("finish getting pixels.");
-
-		Thread thread = new ScreenShotThread(bufferedimage);
-		thread.start();*/
-
-		return  file != null ? file.getName() : null;
+		return resizedImage;
 
 	}
 
@@ -149,14 +95,55 @@ public class ScreenShotHelper {
 			}
 
 			++i;
+
+			if(i > 100) {
+				break;
+			}
 		}
+
+		return null;
 
 	}
 
-/*	public static int[] getPixels() {
+	private static class ScreenShotThread extends Thread {
 
-		return pixelValues;
+		private NativeImage image;
 
-	}*/
+		public ScreenShotThread(NativeImage image) {
+			this.image = image;
+		}
+
+		public void run() {
+
+			File file = null;
+			try {
+				File directory = new File(Minecraft.getInstance().gameDir, "screenshots");
+				boolean result = directory.exists();
+				if(!result) {
+					result = directory.mkdir();
+				}
+				if(result) {
+					file = getTimestampedPNGFileForDirectory(directory);
+					if (file != null) {
+						PreciousShotCore.log("file name is {}.", file.getPath());
+						this.image.write(file);
+
+						if (PSOption.CHAT.isEnable()) {
+							LangHelper.sendChatWithViewOpen(LangKey.SHOOTING_DONE, LangKey.SHOOTING_URL, file.getName());
+						}
+					}
+					else {
+						LangHelper.sendChat(LangKey.SHOOTING_FAILED);
+					}
+				}
+			}
+			catch(Exception exception) {
+				PreciousShotCore.log("exception: {}", exception.toString());
+			}
+			finally {
+				this.image.close();
+			}
+		}
+	}
 
 }

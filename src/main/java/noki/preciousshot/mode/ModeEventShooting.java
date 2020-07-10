@@ -118,7 +118,7 @@ public class ModeEventShooting {
 		
 		switch (event.phase) {
 			case START:
-				this.isRightClicked = false;
+//				this.isRightClicked = false;
 				break;
 			case END:
 				if(CONT.isEnable() && (ModeManager.keyF2.isKeyDown() || this.isRightClicked)) {
@@ -154,7 +154,7 @@ public class ModeEventShooting {
 	//マウス右クリックにスクリーンショット
 	@SubscribeEvent
 	public void onMouseInput(InputEvent.MouseInputEvent event) {
-		
+
 		if(!this.enable) {
 			return;
 		}
@@ -165,11 +165,13 @@ public class ModeEventShooting {
 		
 		//右クリックで撮影。
 		if(event.getButton() == GLFW.GLFW_MOUSE_BUTTON_RIGHT && event.getAction() == GLFW.GLFW_PRESS) {
-			event.setCanceled(true);
 			this.isRightClicked = true;
 			this.dealScreenshot();
 		}
-		
+		if(event.getButton() == GLFW.GLFW_MOUSE_BUTTON_RIGHT && event.getAction() == GLFW.GLFW_RELEASE) {
+			this.isRightClicked = false;
+		}
+
 	}
 
 	//ホイールでズーム(fov)
@@ -180,10 +182,10 @@ public class ModeEventShooting {
 		if(wheel != 0) {
 			PreciousShotCore.log("wheel not zero / {}.", wheel);
 			if(wheel > 0) {
-				FOV.add();
+				FOV.add(2);
 			}
 			else if(wheel < 0) {
-				FOV.dif();
+				FOV.dif(2);
 			}
 			PreciousShotCore.log("fov / {}.", FOV.getDouble());
 			RenderHelper.applySettingEffect();
@@ -225,21 +227,20 @@ public class ModeEventShooting {
 		
 	}
 	
-	public String saveScreenshot(int top, int right, int bottom, int left) {
+	public void saveScreenshot(int top, int right, int bottom, int left) {
 
 		PreciousShotCore.log("on save screen shot.");
 
-		String fileName =  ScreenShotHelper.saveScreenshot(top, right, bottom, left);
-		if(PSOption.CHAT.isEnable()) {
+		String fileName = ScreenShotHelper.saveScreenshot(top, right, bottom, left);
+/*		if(PSOption.CHAT.isEnable()) {
 			if(fileName != null) {
 				LangHelper.sendChatWithViewOpen(LangKey.SHOOTING_DONE, LangKey.SHOOTING_URL, fileName);
 			}
 			else {
 				LangHelper.sendChat(LangKey.SHOOTING_FAILED);
 			}
-		}
-		return fileName;
-		
+		}*/
+//		return fileName;
 	}
 	
 	public void openMode() {
