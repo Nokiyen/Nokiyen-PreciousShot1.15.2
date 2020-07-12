@@ -235,7 +235,7 @@ public class ModeGuiSetting extends Screen {
 		}));
 		
 		this.addButton(new SettingButton(	0+x,	0+y,	16,	16,	32,	64,	OTHER, button -> {
-//			this.minecraft.displayGuiScreen(new ModeGuiViewing());
+			this.minecraft.displayGuiScreen(new ModeGuiViewing());
 		}));
 		
 		RenderHelper.keepOriginalEffect();

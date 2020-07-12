@@ -1,6 +1,7 @@
 package noki.preciousshot.helper;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import net.minecraft.client.renderer.WorldVertexBufferUploader;
 import net.minecraftforge.client.gui.ForgeIngameGui;
 import org.lwjgl.opengl.GL11;
 
@@ -77,6 +78,58 @@ public class RenderHelper {
 		renderer.pos((double)right, (double)top, 0D).endVertex();
 		renderer.pos((double)left, (double)top, 0D).endVertex();
 		
+	}
+
+
+	public static void drawScaledTextureRect(int x, int y, int width, int height, int u, int v, int uEnd, int vEnd, int texWidth, int texHeight) {
+
+		float uStart = (float)u / (float)texWidth;
+		float vStart = (float)v / (float)texHeight;
+		float uEndF = (float)(u+uEnd) / (float)texWidth;
+		float vEndF = (float)(v+vEnd) / (float)texHeight;
+
+		RenderSystem.enableBlend();
+		RenderSystem.blendFuncSeparate(770, 771, 1, 0);
+		RenderSystem.color4f(1F, 1F, 1F, 1F);
+
+		Tessellator tessellator = Tessellator.getInstance();
+		BufferBuilder renderer = tessellator.getBuffer();
+
+		renderer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION);
+		renderer.pos(x, y+height, 10D).tex(uStart, vEndF).endVertex();
+		renderer.pos(x+width, y+height, 10D).tex(uEndF, vEndF).endVertex();
+		renderer.pos(x+width, y, 10D).tex(uEndF, vStart).endVertex();
+		renderer.pos(x, y, 10D).tex(uStart, vStart).endVertex();
+
+		tessellator.draw();
+
+		RenderSystem.enableBlend();
+
+	}
+
+	public static void drawScaledTexture(int x, int y, int width, int height) {
+
+		final float uScale = 1f / 0x100;
+		final float vScale = 1f / 0x100;
+
+		RenderSystem.enableBlend();
+		RenderSystem.blendFuncSeparate(770, 771, 1, 0);
+		RenderSystem.color4f(1F, 1F, 1F, 1F);
+
+		BufferBuilder renderer = Tessellator.getInstance().getBuffer();
+
+		renderer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX);
+		renderer.pos(x, y+height, 10D).tex(0,1).endVertex();
+		renderer.pos(x+width, y+height, 10D).tex(1,1).endVertex();
+		renderer.pos(x+width, y, 10D).tex(1,0).endVertex();
+		renderer.pos(x, y, 10D).tex(0,0).endVertex();
+
+		renderer.finishDrawing();
+		RenderSystem.enableAlphaTest();
+		WorldVertexBufferUploader.draw(renderer);
+
+//		RenderSystem.enableBlend();
+
 	}
 	
 	public static void renderBorder(int top, int right, int bottom, int left, int dispWidth, int dispHeight, int type) {

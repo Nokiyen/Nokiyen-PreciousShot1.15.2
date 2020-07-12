@@ -11,8 +11,12 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.TextureUtil;
 import net.minecraft.resources.IReloadableResourceManager;
 import net.minecraft.resources.IResourcePack;
+import net.minecraft.resources.ResourcePackType;
 import net.minecraft.resources.SimpleReloadableResourceManager;
 import net.minecraft.util.ResourceLocation;
+import noki.preciousshot.PreciousShotCore;
+
+import javax.imageio.ImageIO;
 
 
 /**********
@@ -28,7 +32,7 @@ public class ResourceManager {
 	// define member variables.
 	//******************************//
 	public static File screenshotsDirectory;
-	public static IResourcePack screenshotsResourcePack;
+	public static ScreenShotsResourcePack screenshotsResourcePack;
 	public static ArrayList<ShotResource> resources;
 	
 	
@@ -49,25 +53,32 @@ public class ResourceManager {
 	}
 	
 	public static void reloadResources() {
-		
-//		((SimpleReloadableResourceManager)Minecraft.getInstance().getResourceManager()).reloadResourcePack(screenshotsResourcePack);
+
+		PreciousShotCore.log("enter reloadResources.");
+		((SimpleReloadableResourceManager)Minecraft.getInstance().getResourceManager()).addResourcePack(screenshotsResourcePack);
 		
 		Thread thread = new Thread() {
 			@Override
 			synchronized public void run() {
+				PreciousShotCore.log("enter run.");
 				resources.clear();
 				File[] files = screenshotsDirectory.listFiles();
+				PreciousShotCore.log("{}", files.length);
 				Arrays.sort(files, new DateDescComparator());
 				for(File each: files) {
 					if(!isImage(each)) {
+						PreciousShotCore.log("not a file.");
 						continue;
 					}
 					ResourceLocation location = new ResourceLocation("ps_screenshots", each.getName());
 					try {
-/*						InputStream stream = screenshotsResourcePack.getInputStream(location);
-						BufferedImage image = TextureUtil.func_225684_a_(stream);
-						resources.add(new ShotResource(each, location, image.getWidth(), image.getHeight()));*/
-					} catch (Exception e) {
+						PreciousShotCore.log("{}", location.getPath());
+						InputStream stream = screenshotsResourcePack.getInputStream(location.getPath());
+						BufferedImage image = ImageIO.read(stream);
+						resources.add(new ShotResource(each, location, image.getWidth(), image.getHeight()));
+					}
+					catch (Exception e) {
+						PreciousShotCore.log("{}", e.getMessage());
 					}
 				}
 			}
